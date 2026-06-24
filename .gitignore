@@ -161,3 +161,9 @@ cython_debug/
 
 .ruff_cache/
 *.zip
+.DS_Store
+.vscode
+data
+*.result
+*.json
+cs336_assignment1_basics_marked.pdf

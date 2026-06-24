@@ -1,5 +1,6 @@
 import json
 import regex
+import collections
 from collections.abc import Iterable
 from collections.abc import Iterator
 
@@ -11,11 +12,12 @@ class Tokenizer:
         self.vocab = vocab
         self.merges = merges
         self.special_tokens = special_tokens
-        self.token_to_ID = {v: k for k, v in vocab.items()}
+        self.token_to_ID = {token: ID for ID, token in vocab.items()}
         if self.special_tokens:
             self.special_tokens_set = set(self.special_tokens)
             self.special_tokens_sorted = sorted(self.special_tokens, key=len, reverse=True)
             self.split_pattern = "(" + "|".join([regex.escape(token) for token in self.special_tokens_sorted]) + ")"
+        self.merge_idx = {pair: idx for idx, pair in enumerate(merges)}
     
     @classmethod
     def from_files(cls, vocab_filepath, merges_filepath, special_tokens=None):
@@ -35,17 +37,26 @@ class Tokenizer:
     
     def _encode_chunk(self, text: str):
         PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-        words = regex.findall(PAT, text)
+        words = regex.findall(PAT, text) # words: list[str]
+         
         ids = []
         for word_str in words:   # word: str -> list[bytes, ...]
             word = [bytes([byte]) for byte in word_str.encode("utf-8")]
-            for pair in self.merges:
-                new_token = pair[0] + pair[1]
+            while True:
+                to_merge = []
                 word_len = len(word)
+                for i in range(word_len-1):
+                    idx = self.merge_idx.get((word[i], word[i+1]), None)
+                    if idx is not None:
+                        to_merge.append(idx)
+                if not to_merge:
+                    break
+                merge_pair = self.merges[min(to_merge)]
+                new_token = merge_pair[0] + merge_pair[1]
                 new_word = []
                 i = 0
                 while i < word_len:
-                    if i+1 < word_len and pair == (word[i], word[i+1]):
+                    if i+1 < word_len and merge_pair == (word[i], word[i+1]):
                         new_word.append(new_token)
                         i += 2
                     else:

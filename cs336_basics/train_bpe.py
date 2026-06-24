@@ -75,8 +75,11 @@ def train_bpe(input_path, vocab_size, special_tokens):
 
     with open(input_path, "r", encoding="utf-8") as f:
         input_text = f.read()
-    special_tokens_set = "|".join([regex.escape(token) for token in special_tokens])
-    split_input_text = regex.split(special_tokens_set, input_text)
+    if special_tokens:
+        special_tokens_set = "|".join([regex.escape(token) for token in special_tokens])
+        split_input_text = regex.split(special_tokens_set, input_text)
+    else:
+        split_input_text = [input_text]
 
     total_word_counts = collections.Counter()
     for text in split_input_text:

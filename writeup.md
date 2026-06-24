@@ -57,3 +57,30 @@ Scanning all pairs on every merge step costs ~78% of total runtime.
 
 A heap with lazy deletion would further optimize the algorithm.
 
+### Problem (tokenizer_experiments): Experiments with tokenizers
+
+(a)
+
+Compression ratio on TinyStories (valid): 4.010
+
+Compression ratio on OWT (valid): 4.558
+
+(b)
+
+Compression ratio on OWT (valid) with TinyStories tokenizer: 3.318
+
+Tokenizing OWT with the TinyStories tokenizer yields lower compression ratio than that with the OWT tokenizer, because the TinyStories tokenizer was trained on simple children's stories and lacks tokens for the longer, varied words common in OWT.
+
+(c)
+
+Total bytes: 37,242.000 B
+
+Throughput of the OWT tokenizer: 1,671,109.556 B/sec
+
+Estimated time of tokenizing the Pile dataset: 147 hours
+
+(d)
+
+Since the maximum vocabulary size is 32,000, all token IDs fit within `uint16` (range 0–65,535).
+
+`uint16` can save half the storage of `int32` with no loss of information.

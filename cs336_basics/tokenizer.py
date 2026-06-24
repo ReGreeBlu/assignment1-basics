@@ -12,7 +12,7 @@ class Tokenizer:
         self.merges = merges
         self.special_tokens = special_tokens
         self.token_to_ID = {v: k for k, v in vocab.items()}
-        if self.special_tokens is not None:
+        if self.special_tokens:
             self.special_tokens_set = set(self.special_tokens)
             self.special_tokens_sorted = sorted(self.special_tokens, key=len, reverse=True)
             self.split_pattern = "(" + "|".join([regex.escape(token) for token in self.special_tokens_sorted]) + ")"
@@ -57,7 +57,7 @@ class Tokenizer:
         return ids
 
     def encode(self, text: str) -> list[int]:
-        if self.special_tokens is not None:
+        if self.special_tokens:
             split_text = regex.split(self.split_pattern, text)
             ids = []
             for chunk in split_text:

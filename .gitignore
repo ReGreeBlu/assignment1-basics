@@ -166,4 +166,5 @@ cython_debug/
 data
 *.result
 *.json
+*.npy
 cs336_assignment1_basics_marked.pdf

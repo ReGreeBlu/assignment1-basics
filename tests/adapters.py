@@ -136,7 +136,6 @@ def run_multihead_self_attention(
     Args:
         d_model (int): Dimensionality of the feedforward input and output.
         num_heads (int): Number of heads to use in multi-headed attention.
-        max_seq_len (int): Maximum sequence length to pre-cache if your implementation does that.
         q_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the Q projection
         k_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the K projection
         v_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the V projection
@@ -147,7 +146,14 @@ def run_multihead_self_attention(
         Float[Tensor, " ... sequence_length d_model"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    from cs336_basics.multihead_self_attention import CausalMultiHeadSelfAttention
+    multihead_self_attention = CausalMultiHeadSelfAttention(d_model, num_heads)
+    weights = {"q_proj.weight": q_proj_weight,
+               "k_proj.weight": k_proj_weight,
+               "v_proj.weight": v_proj_weight,
+               "o_proj.weight": o_proj_weight}
+    multihead_self_attention.load_state_dict(weights)
+    return multihead_self_attention(in_features)
 
 
 def run_multihead_self_attention_with_rope(
@@ -187,7 +193,14 @@ def run_multihead_self_attention_with_rope(
         Float[Tensor, " ... sequence_length d_model"]: Tensor with the output of running your optimized, batched multi-headed attention
         implementation with the given QKV projection weights and input features.
     """
-    raise NotImplementedError
+    from cs336_basics.multihead_self_attention_with_rope import CausalMultiHeadSelfAttention
+    multihead_self_attention = CausalMultiHeadSelfAttention(d_model, num_heads, theta, max_seq_len)
+    weights = {"q_proj.weight": q_proj_weight,
+               "k_proj.weight": k_proj_weight,
+               "v_proj.weight": v_proj_weight,
+               "o_proj.weight": o_proj_weight}
+    multihead_self_attention.load_state_dict(weights)
+    return multihead_self_attention(in_features, token_positions)
 
 
 def run_rope(

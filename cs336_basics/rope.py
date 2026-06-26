@@ -19,8 +19,8 @@ class RotaryPositionalEmbedding(nn.Module):
         for i in range(seq_len):
             for k in range(self.d_k//2):
                 p = x[..., i, 2*k:2*k+2]
-                cos_val = self.cos[token_positions[..., i]][k]
-                sin_val = self.sin[token_positions[..., i]][k]
+                cos_val = self.cos[token_positions[..., i], k]
+                sin_val = self.sin[token_positions[..., i], k]
                 y[..., i, 2*k] = p[..., 0]*cos_val - p[..., 1]*sin_val
                 y[..., i, 2*k+1] = p[..., 0]*sin_val + p[..., 1]*cos_val
         return y

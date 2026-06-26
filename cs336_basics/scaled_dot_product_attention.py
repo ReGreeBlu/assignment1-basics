@@ -2,8 +2,6 @@ import torch
 from cs336_basics.softmax import softmax
 
 def scaled_dot_product_attention(Q, K, V, mask=None):
-    queries = Q.shape[-2]
-    keys = K.shape[-2]
     d_k = K.shape[-1]
     K_trans = torch.transpose(K, dim0=-1, dim1=-2)
     dot_product = torch.matmul(Q, K_trans)/(d_k ** 0.5)

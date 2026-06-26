@@ -29,9 +29,9 @@ def run_linear(
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
     from cs336_basics.linear import Linear
-    linear_layer = Linear(d_in, d_out)
-    linear_layer.load_state_dict({"weight": weights})
-    return linear_layer.forward(in_features)
+    linear = Linear(d_in, d_out)
+    linear.load_state_dict({"weight": weights})
+    return linear(in_features)
 
 
 def run_embedding(
@@ -53,9 +53,9 @@ def run_embedding(
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
     from cs336_basics.embedding import Embedding
-    embedding_layer = Embedding(vocab_size, d_model)
-    embedding_layer.load_state_dict({"weight": weights})
-    return embedding_layer.forward(token_ids)
+    embedding = Embedding(vocab_size, d_model)
+    embedding.load_state_dict({"weight": weights})
+    return embedding(token_ids)
 
 
 def run_swiglu(
@@ -87,7 +87,11 @@ def run_swiglu(
     # swiglu.w1.weight.data = w1_weight
     # swiglu.w2.weight.data = w2_weight
     # swiglu.w3.weight.data = w3_weight
-    raise NotImplementedError
+    from cs336_basics.positionwise_feedforward import SwiGLU
+    swiglu = SwiGLU(d_model, d_ff)
+    weights = {"w1.weight": w1_weight, "w2.weight": w2_weight, "w3.weight": w3_weight}
+    swiglu.load_state_dict(weights)
+    return swiglu(in_features)
 
 
 def run_scaled_dot_product_attention(
@@ -383,9 +387,9 @@ def run_rmsnorm(
         RMSNorm of the `in_features`.
     """
     from cs336_basics.rmsnorm import RMSNorm
-    rmsnorm_layer = RMSNorm(d_model, eps)
-    rmsnorm_layer.load_state_dict({"weight": weights})
-    return rmsnorm_layer.forward(in_features)
+    rmsnorm = RMSNorm(d_model, eps)
+    rmsnorm.load_state_dict({"weight": weights})
+    return rmsnorm(in_features)
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:

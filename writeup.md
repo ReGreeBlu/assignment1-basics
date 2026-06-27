@@ -84,3 +84,205 @@ Estimated time of tokenizing the Pile dataset: 147 hours
 Since the maximum vocabulary size is 32,000, all token IDs fit within `uint16` (range 0–65,535).
 
 `uint16` can save half the storage of `int32` with no loss of information.
+
+### Problem (transformer_accounting): Transformer LM resource accounting
+
+(a)
+
+Model weights: 
+
+            - `token_embeddings.weight`
+                - Shape is (vocab_size, d_model).
+   - `layers.{num_layers}.attn.q_proj.weight`
+        - Shape is (num_heads * (d_model / num_heads), d_model).
+   - `layers.{num_layers}.attn.k_proj.weight`
+        - Shape is (num_heads * (d_model / num_heads), d_model).
+   - `layers.{num_layers}.attn.v_proj.weight`
+        - Shape is (num_heads * (d_model / num_heads), d_model).
+   - `layers.{num_layers}.attn.output_proj.weight`
+        - Shape is ((d_model / num_heads) * num_heads, d_model).
+   - `layers.{num_layers}.ln1.weight`
+        - Shape is (d_model,).
+   - `layers.{num_layers}.ffn.w1.weight`
+        - Shape is (d_ff, d_model).
+   - `layers.{num_layers}.ffn.w2.weight`
+        - Shape is (d_model, d_ff).
+   - `layers.{num_layers}.ffn.w3.weight`
+        - Shape is (d_ff, d_model).
+   - `layers.{num_layers}.ln2.weight`
+        - Shape is (d_model,).
+   - `ln_final.weight`
+        - Shape is (d_model, ).
+   - `lm_head.weight`
+        - Shape is (vocab_size, d_model).
+
+GPT-2 XL-sized model:
+
++ vocab_size: 50,257
+
++ context_length: 1,024
+
++ num_layers: 48
+
++ d_model: 1,600
+
++ num_heads: 25
+
++ d_ff: 4,288
+
+Total number of parameters: 1640452800
+
+Memory required to load the model: 6.11 GB
+
+(b)
+
+In each Transformer block:
+
++ Q, K, V projection
+  + d_k = d_v = d_model / num_heads
+  + Q, K: (seq_len, d_model) * (d_model, num_heads * d_k)
+  + V:  (seq_len, d_model) * (d_model, num_heads * d_v)
+  + Total number of FLOPs: 15728640000
++ Attention scores
+  + (seq_len, d_k) * (d_k, seq_len)
+  + num_heads times
+  + Total number of FLOPs (all heads): 3355443200
++ Attention output
+  + (seq_len, seq_len) * (seq_len, d_v)
+  + num_heads times
+  + Total number of FLOPs (all heads): 3355443200
++ Output projection
+  + (seq_len, num_head * d_v) * (num_head * d_v, d_model)
+  + Total number of FLOPs: 5242880000
++ FFN
+  + W1, W3: (seq_len, d_model) * (d_model, d_ff)
+  + W2: (seq_len, d_ff) * (d_ff, d_model)
+  + Total number of FLOPs: 42152755200
+
+The matrix multiplies above will run num_layers times
+
+Global: 
+
++ Output embedding
+  + (seq_len, d_model) * (d_model, vocab_size)
+  + Total number of FLOPs: 164682137600
+
+Summed up FLOPs: 3,516,769,894,400 
+
+(c)
+
+FFN of all layers takes up the biggest part of the total FLOPs.
+
+Number of FLOPs in FFN (all layers): 2,023,332,249,600 (57.53%)
+
+(d)
+
+GPT-2 small:
+
++ model size
+
+  + vocab_size: 50,257
+
+  + context_length: 1,024
+
+  + num_layers: 12
+
+  + d_model: 768
+
+  + num_heads: 12
+
+  + d_ff: 2,048
+
++ Proportion of each component
+  + Causal Multi-Head Self-Attention with RoPE: 33.13%
+  + Position-Wise Feed-Forward: 39.76%
+  + Linear (Output Embedding): 27.10%
+
+GPT-2 medium:
+
++ model size
+
+  + vocab_size: 50,257
+
+  + context_length: 1,024
+
+  + num_layers: 24
+
+  + d_model: 1,024
+
+  + num_heads: 16
+
+  + d_ff: 2,752
+
++ Proportion of each component
+
+  + Causal Multi-Head Self-Attention with RoPE: 37.25%
+  + Position-Wise Feed-Forward: 50.05%
+  + Linear (Output Embedding): 12.70%
+
+GPT-2 large:
+
++ model size
+
+  + vocab_size: 50,257
+
+  + context_length: 1,024
+
+  + num_layers: 36
+
+  + d_model: 1,280
+
+  + num_heads: 20
+
+  + d_ff: 3,392
+
++ proportion of each component
+
+  + Causal Multi-Head Self-Attention with RoPE: 38.25%
+  + Position-Wise Feed-Forward: 54.30%
+  + Linear (Output Embedding): 7.45%
+
+GPT-2 XL:
+
++ model size:
+  + vocab_size: 50,257
+  + context_length: 1,024
+  + num_layers: 48
+  + d_model: 1,600
+  + num_heads: 25
+  + d_ff: 4,288
++ proportion of each component
+  + Causal Multi-Head Self-Attention with RoPE: 37.78%
+  + Position-Wise Feed-Forward: 57.53%
+  + Linear (Output Embedding): 4.68%
+
+In conclusion, as model size grows larger, the proportion of Position-Wise Feed-Forward increases, while the proportion of Linear (Output Embedding) decreases significantly, and the proportion of Causal Multi-Head Self-Attention with RoPE holds steady.
+
+(e)
+
+GPT-2 XL (updated):
+
++ model size:
+  + vocab_size: 50,257
+  + context_length: 16,384
+  + num_layers: 48
+  + d_model: 1,600
+  + num_heads: 25
+  + d_ff: 4,288
++ proportion of each component
+  + Causal Multi-Head Self-Attention with RoPE: 73.79%
+  + Position-Wise Feed-Forward: 24.24%
+  + Linear (Output Embedding): 1.97%
+
+The total FLOPs grows from 3,516,769,894,400 to 133,577,729,638,400.
+
+The proportion of Causal Multi-Head Self-Attention with RoPE becomes the most significant, since the number of FLOPs in Attention scores scales quadratically with context length.
+
+
+
+
+
+
+
+
+

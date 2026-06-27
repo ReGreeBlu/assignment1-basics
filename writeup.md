@@ -278,11 +278,7 @@ The total FLOPs grows from 3,516,769,894,400 to 133,577,729,638,400.
 
 The proportion of Causal Multi-Head Self-Attention with RoPE becomes the most significant, since the number of FLOPs in Attention scores scales quadratically with context length.
 
+### Problem (learning_rate_tuning): Tuning the learning rate
 
-
-
-
-
-
-
+Compared to lr=1, the loss decays faster when lr=1e1, and decays even faster and almost reaches 0 when lr=1e2, but diverges when lr=1e3.
 

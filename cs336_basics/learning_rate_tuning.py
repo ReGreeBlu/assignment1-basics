@@ -1,5 +1,5 @@
 import torch
-from cs336_basics.SGD import SGD
+from cs336_basics.sgd import SGD
 
 weights = torch.nn.Parameter(5 * torch.randn((10, 10)))
 opt = SGD([weights], lr=1)

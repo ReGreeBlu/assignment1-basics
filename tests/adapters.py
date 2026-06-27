@@ -375,14 +375,18 @@ def run_transformer_lm(
             - `lm_head.weight`
                 Weights of the language model output embedding.
                 Shape is (vocab_size, d_model).
-        in_indices (Int[Tensor, "batch_size sequence_length"]) Tensor with input indices to run the language model on. Shape is (batch_size, sequence_length), where
+        in_indices (Int[Tensor, "batch_size sequence_length"]) Tensor with input indices to run the language model on.
+            Shape is (batch_size, sequence_length), where
             `sequence_length` is at most `context_length`.
 
     Returns:
         Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
         next-word distribution for each token.
     """
-    raise NotImplementedError
+    from cs336_basics.transformer_lm import TransformerLM
+    transformerlm = TransformerLM(vocab_size, context_length, d_model, num_layers, num_heads, d_ff, rope_theta)
+    transformerlm.load_state_dict(weights)
+    return transformerlm(in_indices)
 
 
 def run_rmsnorm(

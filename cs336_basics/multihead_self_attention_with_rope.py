@@ -13,7 +13,7 @@ class CausalMultiHeadSelfAttention(nn.Module):
         self.q_proj = Linear(d_model, d_model)
         self.k_proj = Linear(d_model, d_model)
         self.v_proj = Linear(d_model, d_model)
-        self.o_proj = Linear(d_model, d_model)
+        self.output_proj = Linear(d_model, d_model)
         self.rope = RotaryPositionalEmbedding(theta, self.d_k, max_seq_len)
 
     def forward(self, x: torch.Tensor, token_positions: torch.Tensor) -> torch.Tensor:
@@ -30,5 +30,5 @@ class CausalMultiHeadSelfAttention(nn.Module):
         mask = torch.tril(mask)
         multihead = scaled_dot_product_attention(Q, K, V, mask)
         multihead = multihead.transpose(-3, -2).reshape(x.shape)
-        attention = self.o_proj(multihead)
+        attention = self.output_proj(multihead)
         return attention

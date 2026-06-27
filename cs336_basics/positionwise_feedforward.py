@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from cs336_basics.linear import Linear
-
+from cs336_basics.silu import silu
 class SwiGLU(nn.Module):
     def __init__(self, d_model, d_ff=None, device=None, dtype=None):
         super().__init__()
@@ -13,7 +13,6 @@ class SwiGLU(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y1 = self.w1(x)
-        silu_y1 = y1*torch.sigmoid(y1)
         y3 = self.w3(x)
-        return self.w2(silu_y1*y3)
+        return self.w2(silu(y1)*y3)
 

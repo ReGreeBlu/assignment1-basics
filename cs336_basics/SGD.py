@@ -18,8 +18,7 @@ class SGD(torch.optim.Optimizer):
             if p.grad is None:
                 continue
             state = self.state[p] # Get state associated with p.
-            t = state.get("t"
-            , 0) # Get iteration number from the state, or 0.
+            t = state.get("t", 0) # Get iteration number from the state, or 0.
             grad = p.grad.data # Get the gradient of loss with respect to p.
             p.data -= lr / math.sqrt(t + 1) * grad # Update weight tensor in-place.
             state["t"] = t + 1 # Increment iteration number.

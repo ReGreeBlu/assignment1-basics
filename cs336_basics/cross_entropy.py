@@ -1,12 +1,11 @@
 import torch
 
-def cross_entropy(o, x):
-    m = x.shape[-1]
-    loss = 0
-    value_max = torch.max(o, dim=-1, keepdim=True).values
-    o_subtract_max = o - value_max
-    exp_value = torch.exp(o_subtract_max)
-    sum_exp_value = torch.sum(exp_value, dim=-1)
-    for i in range(m):
-        loss += torch.log(sum_exp_value[i]) - o_subtract_max[i][x[i]]
-    return loss/m
+def cross_entropy(logits: torch.Tensor, targets: torch.Tensor):
+    logits = logits.reshape(-1, logits.shape[-1])
+    targets = targets.reshape(-1)
+    n = logits.shape[0]
+    log_sum_exp_value = torch.logsumexp(logits, dim=-1)
+    targets_index = targets.reshape(-1, 1)
+    targets_value = torch.gather(logits, -1, targets_index).squeeze(-1)
+    loss = torch.mean(log_sum_exp_value - targets_value)
+    return loss

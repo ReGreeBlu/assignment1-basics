@@ -26,7 +26,7 @@ class CausalMultiHeadSelfAttention(nn.Module):
         V = V.reshape(*x.shape[:-1], self.num_heads, self.d_v).transpose(-3, -2)
         Q = self.rope(Q, token_positions)
         K = self.rope(K, token_positions)
-        mask = torch.ones(seq_len, seq_len, dtype=torch.bool)
+        mask = torch.ones(seq_len, seq_len, dtype=torch.bool, device=x.device)
         mask = torch.tril(mask)
         multihead = scaled_dot_product_attention(Q, K, V, mask)
         multihead = multihead.transpose(-3, -2).reshape(x.shape)

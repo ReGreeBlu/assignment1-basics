@@ -164,6 +164,7 @@ cython_debug/
 .DS_Store
 .vscode
 data
+output
 record
 *.result
 *.json

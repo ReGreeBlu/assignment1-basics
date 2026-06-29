@@ -100,7 +100,7 @@ src = "output/checkpoints/step_4000.pt"
 current_step = load_checkpoint(src, model, optimizer)
 print(f"Reloading model: current_step = {current_step:5d}")
 
-for step in range(current_step+1, num_steps):
+for step in range(current_step+1, num_steps+1):
     in_indices, targets = get_batch(dataset_train, batch_size, context_length, device)
     logits = model(in_indices)
     loss = cross_entropy(logits, targets)
@@ -111,16 +111,6 @@ for step in range(current_step+1, num_steps):
     for group in optimizer.param_groups:
         group["lr"] = lr
     optimizer.step()
-
-    # if step % logging_interval == 0:
-    #     loss_train = loss.item()
-    #     print(f"step = {step:5d}, loss_train = {loss_train:.6f}")
-    # if step % eval_interval == 0:
-    #     loss_valid = evaluate(model, dataset_valid, batch_size, context_length, device).item()
-    #     print(f"validation: step = {step:5d}, loss_valid = {loss_valid:.6f}")
-    # if step % checkpoint_interval == 0:
-    #     out = os.path.join(checkpoint_path, f"step_{step}.pt")
-    #     save_checkpoint(model, optimizer, step, out)
 
 out = os.path.join(checkpoint_path, f"step_final.pt")
 save_checkpoint(model, optimizer, step, out)

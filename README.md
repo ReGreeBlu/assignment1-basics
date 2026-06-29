@@ -34,7 +34,7 @@ Built as a self-directed implementation of Stanford's [CS336](https://stanford-c
 
 ### Training & validation loss
 
-The model converges from a random-init loss of ~9.25 ($\approx \ln 10000$) to a validation loss of 1.61.
+The model converges from a random-init loss of 9.25 ($\approx \ln 10000$) to a validation loss of 1.61.
 
 ![Training curves](assets/training_loss_curves.png)
 
@@ -97,8 +97,8 @@ uv run python -m cs336_basics.generate \
 
 ## Notes
 
-- The 100× bottleneck: the initial RoPE implementation applied rotations with a nested Python loop over (sequence position × frequency), launching ~200k tiny GPU kernels per forward pass. Rewriting it as batched tensor operations (gather precomputed cos/sin tables, even/odd slicing, broadcasted rotation) cut per-step time from ~50s to ~0.5s on MPS.
-- Stability vs. learning rate: AdamW normalizes per-parameter updates to roughly unit scale, and gradient clipping caps the global norm — together they keep training stable across lr ∈ [1e-4, 1e-2], far wider than raw SGD would allow. Catastrophic divergence appears only at lr ≥ 1, as oscillatory instability.
+- The 100× bottleneck: the initial RoPE implementation applied rotations with a nested Python loop over (sequence position × frequency), launching ~200k tiny GPU kernels per forward pass. Rewriting it as batched tensor operations (gather precomputed cos/sin tables, even/odd slicing, broadcasted rotation) cut per-step time from 50s to 0.5s on MPS.
+- Stability vs. learning rate: AdamW normalizes per-parameter updates to roughly unit scale, and gradient clipping caps the global norm — together they keep training stable across lr $\in$ [1e-4, 1e-2], far wider than raw SGD would allow. Catastrophic divergence appears only at lr $\ge$ 1, as oscillatory instability.
 
 ## Acknowledgments
 

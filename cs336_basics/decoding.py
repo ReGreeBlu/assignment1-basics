@@ -28,8 +28,8 @@ def decode(tokenizer: Tokenizer, special_tokens: list[str],
         else:
             logits = model(inputs)
             next_token = get_nucleus_sampling_token(logits[seq_len-1], temperature=temperature, threshold=threshold)
-        inputs = torch.cat([inputs, next_token], dim=-1)
         if next_token.item() in special_token_ids:
             break
+        inputs = torch.cat([inputs, next_token], dim=-1)
     output_tokens = inputs.tolist()
     return output_tokens

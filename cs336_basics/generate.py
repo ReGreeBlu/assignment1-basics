@@ -2,6 +2,7 @@ import argparse
 import torch
 import textwrap
 import numpy as np
+import os
 from cs336_basics.tokenizer import Tokenizer
 from cs336_basics.decoding import decode
 from cs336_basics.transformer_lm import TransformerLM
@@ -48,6 +49,8 @@ parser.add_argument("--checkpoint_path", type=str, default="output/checkpoints")
 parser.add_argument("--max_num_tokens", type=int, default=1000)
 parser.add_argument("--temperature", type=float, default=0.5)
 parser.add_argument("--threshold", type=float, default=0.6)
+parser.add_argument("--checkpoint", type=str, required=True)
+parser.add_argument("--prompt", type=str, required=True)
 
 arg = parser.parse_args()
 
@@ -84,8 +87,10 @@ cosine_cycle_iters = arg.cosine_cycle_iters
 max_num_tokens = arg.max_num_tokens
 temperature = arg.temperature
 threshold = arg.threshold
+checkpoint = arg.checkpoint
+prompt = arg.prompt
 
-if lr is None:
+if arg.lr is None:
     lr = max_learning_rate
 if arg.warmup_iters is None:
     warmup_iters = num_steps * 0.05
@@ -97,16 +102,14 @@ model = model.to(device)
 
 optimizer = AdamW(model.parameters(), betas=betas, eps=eps, weight_decay=weight_decay)
 
-src = "output/checkpoints/step_final.pt"
-step = load_checkpoint(src, model, optimizer)
+step = load_checkpoint(checkpoint, model, optimizer)
 
 model.eval()
 with torch.no_grad():
-    prompt = input("Enter prompt:\n")
     input_tokens = tokenizer.encode(prompt)
     output_tokens = decode(tokenizer, special_tokens,
                            model, input_tokens,
                            max_num_tokens, context_length, device,
                            temperature, threshold)
     response = tokenizer.decode(output_tokens)
-    print(f"\nResponse:\n" + textwrap.fill(response, width=100))
+    print(textwrap.fill(response, width=100))

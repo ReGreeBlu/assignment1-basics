@@ -1,8 +1,5 @@
 import argparse
 import torch
-import textwrap
-import numpy as np
-import os
 from cs336_basics.tokenizer import Tokenizer
 from cs336_basics.decoding import decode
 from cs336_basics.transformer_lm import TransformerLM
@@ -112,4 +109,4 @@ with torch.no_grad():
                            max_num_tokens, context_length, device,
                            temperature, threshold)
     response = tokenizer.decode(output_tokens)
-    print(textwrap.fill(response, width=100))
+    print(response)

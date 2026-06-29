@@ -165,7 +165,7 @@ cython_debug/
 .vscode
 data
 output
-record
+local
 *.result
 *.json
 *.npy

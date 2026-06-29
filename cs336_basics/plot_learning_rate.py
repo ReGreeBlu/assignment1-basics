@@ -27,7 +27,7 @@ plt.title("Training Loss Across Learning Rates", fontsize=16)
 plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=10)
 plt.grid(alpha=0.5)
 plt.tight_layout()
-plt.savefig("record/sweep_loss_curves.png", dpi=600, bbox_inches="tight", pad_inches=0.3)
+plt.savefig("local/sweep_lr_loss_curves.png", dpi=600, bbox_inches="tight", pad_inches=0.3)
 
 # Plot final loss vs lr
 src = os.path.join(log_path, f"sweep_valid_*.csv")
@@ -79,5 +79,5 @@ plt.axvspan(1e-2, 10, alpha=0.1, color="red")
 plt.title("Validation Loss vs. Learning Rate", fontsize=16)
 plt.grid(alpha=0.5)
 plt.tight_layout()
-plt.savefig("record/sweep_loss_vs_lr.png", dpi=300, bbox_inches="tight", pad_inches=0.3)
+plt.savefig("local/sweep_lr_loss_vs_lr.png", dpi=300, bbox_inches="tight", pad_inches=0.3)
 

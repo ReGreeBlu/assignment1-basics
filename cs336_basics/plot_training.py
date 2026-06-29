@@ -33,6 +33,6 @@ ax2.set_xlabel("time (s)"); ax2.set_ylabel("loss (log)"); ax2.legend()
 
 fig.suptitle("Loss Curves", fontsize=18)
 plt.tight_layout()
-plt.savefig("local/loss_curves.png", dpi=300, bbox_inches="tight", pad_inches=0.3)
+plt.savefig("local/training_loss_curves.png", dpi=300, bbox_inches="tight", pad_inches=0.3)
 
 

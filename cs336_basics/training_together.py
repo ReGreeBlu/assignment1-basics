@@ -31,8 +31,8 @@ parser.add_argument("--eps", type=float, default=1e-8)
 parser.add_argument("--weight_decay", type=float, default=1e-2)
 
 # scheduler hyperparameters
-parser.add_argument("--max_learning_rate", type=float, default=1e-3)
-parser.add_argument("--min_learning_rate", type=float, default=1e-4)
+parser.add_argument("--max_learning_rate", type=float, default=3.5e-3)
+parser.add_argument("--min_learning_rate", type=float, default=1e-5)
 parser.add_argument("--warmup_iters", type=int)
 parser.add_argument("--cosine_cycle_iters", type=int)
 
@@ -43,6 +43,7 @@ parser.add_argument("--num_steps", type=int, default=5000)
 parser.add_argument("--max_l2_norm", type=float, default=1.0)
 parser.add_argument("--eps_gradient_clipping", type=float, default=1e-6)
 parser.add_argument("--checkpoint_path", type=str, default="output/checkpoints")
+parser.add_argument("--log_path", type=str, default="output/")
 
 
 arg = parser.parse_args()
@@ -69,6 +70,7 @@ num_steps = arg.num_steps
 max_l2_norm = arg.max_l2_norm
 eps_gradient_clipping = arg.eps_gradient_clipping
 checkpoint_path = arg.checkpoint_path
+log_path = arg.log_path
 
 # scheduler
 max_learning_rate = arg.max_learning_rate
@@ -135,12 +137,30 @@ for step in range(num_steps):
         out = os.path.join(checkpoint_path, f"step_{step}.pt")
         save_checkpoint(model, optimizer, step, out)
 
-with open("output/tinystories_train_log.csv", "w", newline="") as f:
+# Save final state
+in_indices, targets = get_batch(dataset_train, batch_size, context_length, device)
+logits = model(in_indices)
+loss = cross_entropy(logits, targets)
+# Log training loss
+loss_train = loss.item()
+elapsed = time.perf_counter() - start_time
+train_log.append((num_steps, elapsed, loss_train))
+# Log validation loss
+loss_valid = evaluate(model, dataset_valid, batch_size, context_length, device).item()
+elapsed = time.perf_counter() - start_time
+valid_log.append((num_steps, elapsed, loss_valid))
+# Save checkpoint
+out = os.path.join(checkpoint_path, f"step_{num_steps}.pt")
+save_checkpoint(model, optimizer, step, out)
+
+out = os.path.join(log_path, f"tinystories_train_log.csv")
+with open(out, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["step", "time", "loss"])
     writer.writerows(train_log)
 
-with open("output/tinystories_valid_log.csv", "w", newline="") as f:
+out = os.path.join(log_path, f"tinystories_valid_log.csv")
+with open(out, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["step", "time", "loss"])
     writer.writerows(valid_log)

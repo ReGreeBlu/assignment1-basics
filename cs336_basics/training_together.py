@@ -106,7 +106,7 @@ valid_log = []
 train_log = []
 start_time = time.perf_counter()
 
-for step in range(num_steps):
+for step in range(num_steps+1):
 
     in_indices, targets = get_batch(dataset_train, batch_size, context_length, device)
 
@@ -136,22 +136,6 @@ for step in range(num_steps):
     if step % checkpoint_interval == 0:
         out = os.path.join(checkpoint_path, f"step_{step}.pt")
         save_checkpoint(model, optimizer, step, out)
-
-# Save final state
-in_indices, targets = get_batch(dataset_train, batch_size, context_length, device)
-logits = model(in_indices)
-loss = cross_entropy(logits, targets)
-# Log training loss
-loss_train = loss.item()
-elapsed = time.perf_counter() - start_time
-train_log.append((num_steps, elapsed, loss_train))
-# Log validation loss
-loss_valid = evaluate(model, dataset_valid, batch_size, context_length, device).item()
-elapsed = time.perf_counter() - start_time
-valid_log.append((num_steps, elapsed, loss_valid))
-# Save checkpoint
-out = os.path.join(checkpoint_path, f"step_{num_steps}.pt")
-save_checkpoint(model, optimizer, step, out)
 
 out = os.path.join(log_path, f"tinystories_train_log.csv")
 with open(out, "w", newline="") as f:
